@@ -26,7 +26,7 @@ public class FilmeController : ControllerBase
     [Route("listarFilmes")]
     public IActionResult ListarFilmes([FromQuery] int skip = 0, [FromQuery] int take = 2)
     {
-        return Ok(filmes.Skip(skip).Take(take));
+        return filmes.Count != 0 ? Ok(filmes.Skip(skip).Take(take)) : NotFound();
     }
 
     [HttpGet]
@@ -35,7 +35,6 @@ public class FilmeController : ControllerBase
     {
         var localizaFilme = filmes.Find(filme => filme.Titulo == titulo);   
 
-        return !string.IsNullOrEmpty(titulo) ? Ok(localizaFilme) : BadRequest();
+        return !string.IsNullOrEmpty(titulo) ? Ok(localizaFilme) : NotFound();
     }
-
 }
