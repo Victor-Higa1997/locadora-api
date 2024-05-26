@@ -14,15 +14,8 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IFilmeRepository, FilmeRepository>();
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-var configuration = new MapperConfiguration(cfg =>
-{
-    cfg.CreateMap<FilmeDto, Filme>();
-});
-
-var mapper = configuration.CreateMapper();
-
-builder.Services.AddSingleton(mapper);
 
 var conectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 

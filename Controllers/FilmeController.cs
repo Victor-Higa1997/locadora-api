@@ -74,6 +74,7 @@ public class FilmeController : ControllerBase
         if (filme == null) return NotFound();
         
         var filmeAtualizar = _mapper.Map<patchFilmeDto>(filme);
+        
         patch.ApplyTo(filmeAtualizar, ModelState);
 
         if (!TryValidateModel(filmeAtualizar)) return ValidationProblem(ModelState);
