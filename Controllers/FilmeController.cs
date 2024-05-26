@@ -1,4 +1,5 @@
 ﻿using locadora_api.Models;
+using locadora_api.Repositorys;
 using Microsoft.AspNetCore.Mvc;
 
 namespace locadora_api.Controllers;
@@ -7,34 +8,55 @@ namespace locadora_api.Controllers;
 [Route("[controller]")]
 public class FilmeController : ControllerBase
 {
-    private static List<Filme> filmes = new List<Filme>
+    private readonly IFilmeRepository _filmeRepository;
+    public FilmeController(IFilmeRepository filmeRepository)
     {
-        new Filme { Id = new Guid(), Titulo = "Matrix", Genero = "Ficção Científica", Duracao = 136 },
-        new Filme { Id = new Guid(), Titulo = "O Poderoso Chefão", Genero = "Drama", Duracao = 175 },
-        new Filme { Id = new Guid(), Titulo = "O Senhor dos Anéis: O Retorno do Rei", Genero = "Fantasia", Duracao = 201 }
-    };
+        _filmeRepository = filmeRepository;
+    }
 
     [HttpPost]
     public IActionResult CadastrarFilme([FromBody] Filme filme)
     {
-        filmes.Add(filme);
+        _filmeRepository.AdicionarFilme(filme);
 
-        return Ok("FilmeController");
+        return Ok("Filme cadastrado com sucesso!");
     }
 
     [HttpGet]
     [Route("listarFilmes")]
-    public IActionResult ListarFilmes([FromQuery] int skip = 0, [FromQuery] int take = 2)
+    public async Task<IActionResult> ListarFilmes([FromQuery] int skip = 0, [FromQuery] int take = 2)
     {
-        return filmes.Count != 0 ? Ok(filmes.Skip(skip).Take(take)) : NotFound();
+        var filmes = await _filmeRepository.ObterFilmes();
+
+        return filmes.Any() ? Ok(filmes.Skip(skip).Take(take)) : NotFound();
     }
 
     [HttpGet]
     [Route("listarFilme{titulo}")]
-    public IActionResult ListarFilme(string titulo)
+    public async Task<IActionResult> ListarFilme(string titulo)
     {
-        var localizaFilme = filmes.Find(filme => filme.Titulo == titulo);   
+        var filme = await _filmeRepository.ObterFilmes();
+        var localizaFilme = filme.Where(f => f.Titulo == titulo);
 
         return !string.IsNullOrEmpty(titulo) ? Ok(localizaFilme) : NotFound();
     }
+
+    [HttpPut]
+    [Route("atualizarFilme")]
+    public IActionResult AtualizarFilme([FromBody] Filme filme)
+    {
+        _filmeRepository.AtualizarFilme(filme);
+
+        return Ok("Filme atualizado com sucesso!");
+    }
+
+    [HttpDelete]
+    [Route("removerFilme")]
+    public IActionResult RemoverFilme([FromBody] Filme filme)
+    {
+        _filmeRepository.RemoverFilme(filme);
+
+        return Ok("Filme removido com sucesso!");
+    }
+
 }
