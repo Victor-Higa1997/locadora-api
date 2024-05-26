@@ -1,5 +1,8 @@
-﻿using locadora_api.Models;
+﻿using AutoMapper;
+using locadora_api.Dtos;
+using locadora_api.Models;
 using locadora_api.Repositorys;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace locadora_api.Controllers;
@@ -9,14 +12,17 @@ namespace locadora_api.Controllers;
 public class FilmeController : ControllerBase
 {
     private readonly IFilmeRepository _filmeRepository;
-    public FilmeController(IFilmeRepository filmeRepository)
+    private IMapper _mapper;
+    public FilmeController(IFilmeRepository filmeRepository, IMapper mapper)
     {
         _filmeRepository = filmeRepository;
+        _mapper = mapper;   
     }
 
     [HttpPost]
-    public IActionResult CadastrarFilme([FromBody] Filme filme)
+    public IActionResult CadastrarFilme([FromBody] FilmeDto filmeDto)
     {
+        var filme = _mapper.Map<Filme>(filmeDto);
         _filmeRepository.AdicionarFilme(filme);
 
         return Ok("Filme cadastrado com sucesso!");
@@ -57,6 +63,24 @@ public class FilmeController : ControllerBase
         _filmeRepository.RemoverFilme(filme);
 
         return Ok("Filme removido com sucesso!");
+    }
+
+    [HttpPatch("patchFilme{id}")]
+    public  IActionResult PatchFilme(Guid id, JsonPatchDocument<patchFilmeDto> patch)
+    {
+        var todosFilmes = _filmeRepository.ObterFilmes().Result;
+        var filme  = todosFilmes.FirstOrDefault(f => f.Id == id);
+
+        if (filme == null) return NotFound();
+        
+        var filmeAtualizar = _mapper.Map<patchFilmeDto>(filme);
+        patch.ApplyTo(filmeAtualizar, ModelState);
+
+        if (!TryValidateModel(filmeAtualizar)) return ValidationProblem(ModelState);
+
+        _mapper.Map(filmeAtualizar, filme);
+        _filmeRepository.AtualizarFilme(filme);
+        return NoContent();
     }
 
 }
