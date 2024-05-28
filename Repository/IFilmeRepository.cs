@@ -8,4 +8,5 @@ public interface IFilmeRepository
     void AdicionarFilme(Filme filme);  
     void RemoverFilme(Filme filme);
     void AtualizarFilme(Filme filme);
+    Task<Filme?> ObterFilmePorIdAsync(Guid? id);
 }

@@ -48,9 +48,11 @@ public class FilmeController : ControllerBase
     }
 
     [HttpPut]
-    [Route("atualizarFilme")]
-    public IActionResult AtualizarFilme([FromBody] Filme filme)
+    [Route("atualizarFilme{id}")]
+    public async Task<IActionResult> AtualizarFilme([FromBody] FilmeDto filmeDto, Guid id)
     {
+        Filme? filme = await _filmeRepository.ObterFilmePorIdAsync(id);
+        _mapper.Map(filmeDto, filme);
         _filmeRepository.AtualizarFilme(filme);
 
         return Ok("Filme atualizado com sucesso!");

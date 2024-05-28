@@ -36,4 +36,10 @@ public class FilmeRepository : IFilmeRepository
         _context.Filmes.Remove(filme);
         _context.SaveChanges();
     }
+
+    public async Task<Filme?> ObterFilmePorIdAsync(Guid? id)
+    {
+        Filme? filme = await _context.Filmes.FirstOrDefaultAsync(f => f.Id == id);
+        return filme;
+    }
 }
